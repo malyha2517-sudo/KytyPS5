@@ -1,74 +1,54 @@
-# KytyPS5 for Xbox
+# Русификация KytyPS5 for Xbox
 
-This fork runs [KytyPS5](https://github.com/KytyPS5/KytyPS5), a free and open-source PlayStation 5 translation layer, on the **Xbox Series X** in Developer Mode, as a UWP app that also runs on Windows.
+Перевод интерфейса приложения (`src/uwp`) для сборки **1.1.26329.2343**: библиотека, настройки, игровое меню, оверлей со статистикой, читы, трофеи, раскладка кнопок, диалоги. Переведено около 740 уникальных строк (973 вхождения).
 
-> [!IMPORTANT]
-> KytyPS5 is not affiliated with Sony Interactive Entertainment or PlayStation. The project does
-> not distribute games or copyrighted system software. Use only game files that you have obtained
-> legally.
+В архиве не было файла перевода: весь текст интерфейса записан прямо в C++, а `assets/localization/ru-RU.json` содержит только две системные строки («Трофей получен!» и «Гость»). Поэтому английские строки заменяются русскими прямо в исходниках. В код ничего не добавляется, меняется только содержимое строковых литералов и текст в XAML-разметке.
 
-What the Xbox version adds:
+## Что в папке
 
-- **An app made for the controller.** A game library with covers, game options, settings, trophies, a controller guide and a statistics overlay, laid out like the Xbox's own screens.
-- **A Direct3D 12 renderer** next to upstream's Vulkan renderer. Shaders are translated with Mesa's `spirv_to_dxil`.
-- **Room for big games on the console.** Game memory is committed as it is used, a swap file keeps games within the Series X's app memory limit, and texture options trade detail for memory.
-- **Up to four players.** The DualSense's touchpad, motion sensors, adaptive triggers, haptic feedback, speaker and microphone are mapped to the Xbox controller and its headset.
-- **Games on a USB drive or in Development Files.** Game folders and `.zar` archives play from either, and saves, patches and trophies can live there too.
+| Файл | Для чего |
+|---|---|
+| `ru.patch` | Готовый патч. Из корня исходников: `patch -p1 < ru.patch` (или `git apply ru.patch`) |
+| `changed-files.zip` | Те же 18 изменённых файлов. Распакуйте в корень исходников с заменой |
+| `apply_ru.py` + `ru_part1…5.py` | Скрипт и словарь. Нужны, чтобы русифицировать и более новые сборки |
 
-<p align="center">
-  <strong>Library</strong><br>
-  <img src="docs/screenshots/xbox-01-home.png" width="608" alt="The game library of KytyPS5 on the Xbox Series X">
-</p>
+## Как получить готовое приложение
 
-<table align="center">
-  <tr>
-    <td align="center">
-      <strong>Controller guide</strong><br>
-      <img src="docs/screenshots/xbox-02-controller.png" width="300" alt="How the Xbox controller's buttons work as the DualSense's">
-    </td>
-    <td align="center">
-      <strong>Trophies</strong><br>
-      <img src="docs/screenshots/xbox-03-trophies.png" width="300" alt="A game's trophies with the details of one">
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <strong>Settings</strong><br>
-      <img src="docs/screenshots/xbox-04-settings.png" width="300" alt="The memory and texture settings with their explanation">
-    </td>
-    <td align="center">
-      <strong>Local co-op</strong><br>
-      <img src="docs/screenshots/xbox-05-local-coop.png" width="300" alt="A game with four Xbox controllers as four players">
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <strong>Light game</strong><br>
-      <img src="docs/screenshots/xbox-06-overlay.png" width="300" alt="A light game at 4K and 60 fps with the statistics overlay and the log">
-    </td>
-    <td align="center">
-      <strong>Heavy game</strong><br>
-      <img src="docs/screenshots/xbox-07-astros-playroom.png" width="300" alt="A heavy 3D game with most of its memory in the swap file">
-    </td>
-  </tr>
-</table>
+Приложение нужно собрать заново, подставленный перевод сам по себе ничего не меняет.
 
-The Xbox version is experimental. Not every game that runs on a PC runs on the Xbox, and draws that the Series X cannot do, such as tessellation, are skipped.
+**Через GitHub (проще всего, ничего не нужно ставить):**
+1. Сделайте fork репозитория KytyPS5 for Xbox и загрузите туда исходники из архива.
+2. Примените патч (или распакуйте `changed-files.zip`) и закоммитьте изменения в ветку.
+3. На GitHub откройте Actions → **Xbox build** → Run workflow на этой ветке. Сборка идёт на Windows-раннере, около 1–5 часов.
+4. Скачайте пакет из артефактов (или из Releases, если включили публикацию) и поставьте на Xbox в Developer Mode по инструкции из `src/uwp/README.md`.
 
-- [Releases](https://github.com/Cosmo/KytyPS5/releases) has builds for the Xbox Series X|S in Developer Mode, with the install steps.
-- [XBOX_CHANGES.md](XBOX_CHANGES.md) lists every change against upstream, one commit per topic, and the known limits on the Series X.
-- [src/uwp/README.md](src/uwp/README.md) explains how to build and install the app and how to set up your games.
+**Локально на Windows:** `src/uwp/uwp.ps1` (configure, build, package), нужен Visual Studio с Clang и Windows SDK.
 
-## KytyPS5
+## Новая версия эмулятора
 
-For everything else, such as the desktop builds, running on a PC, the project's status and contributing, see [KytyPS5's README](https://github.com/KytyPS5/KytyPS5#readme).
+```
+python apply_ru.py <папка>/src/uwp/src
+```
 
-## License
+Строки, которых нет в словаре, останутся английскими. Скрипт напечатает их список: их можно перевести и добавить в `ru_part5.py`. Скрипт не трогает строки, которые используются как имена элементов, ключи и в сравнениях (`FindName`, `==`, `find` и т. п.), а также записи в журнале.
 
-KytyPS5 is licensed under the [GNU General Public License version 2](LICENSE)
-(`GPL-2.0-only`).
+## Что проверено и что нет
 
-This project is based on the original [Kyty](https://github.com/InoriRus/Kyty), which was released
-under the MIT License. Kyty's original copyright and license notice are preserved in
-[`LICENSES/Kyty-MIT.txt`](LICENSES/Kyty-MIT.txt). Third-party components remain subject to the
-licenses included with those components.
+Проверено:
+- после замены код вне строковых литералов остаётся тем же, на уровне текста;
+- структура XAML-разметки не изменилась;
+- патч применяется к чистым исходникам и даёт тот же результат, что и скрипт;
+- ни один переведённый литерал не стоит в вызове поиска по имени и не участвует в сравнении.
+
+**Не проверено:** сборка и запуск. В среде, где готовился перевод, нет Windows-тулчейна и доступа к сети, так что приложение не компилировалось и не запускалось. Риски:
+- Русский текст длиннее английского, поэтому в плитках настроек и в оверлее что-то может не поместиться или обрезаться.
+- Числительные подставляются в фиксированную форму: «5 игр» верно, «2 игр» и «3 игр» нет. То же с «контроллеров» и «файлов».
+- Если сборка упадёт, пришлите лог ошибки: скорее всего, дело в одной строке.
+
+## Что осталось на английском
+
+- Названия моделей контроллеров Xbox и список языков консоли (имена собственные).
+- Технические обозначения: FSR, HDR, VRR, V-Sync, PSSR, DSU, HRTF и т. п.
+- Сообщения журнала (логи) и имена элементов интерфейса.
+- Десктопный Qt-лаунчер из `src/launcher` (это другая программа, не приложение для Xbox).
+- Системные строки внутри самих игр: их язык задаётся в Настройки → Система → Язык консоли.
